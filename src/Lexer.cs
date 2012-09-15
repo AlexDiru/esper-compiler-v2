@@ -7,14 +7,47 @@ namespace esper_compiler.src
 {
     class Lexer
     {
+        /// <summary>
+        /// The code of the program
+        /// </summary>
         public String Program;
+
+        /// <summary>
+        /// The character position being read in the program string
+        /// </summary>
         Int32 CharacterPosition;
+
+        /// <summary>
+        /// The line in which the token starts
+        /// </summary>
         Int32 LineStart;
+
+        /// <summary>
+        /// The current line the lexer is on
+        /// </summary>
         Int32 Line;
+
+        /// <summary>
+        /// The number of lines in the program
+        /// </summary>
         Int32 Lines;
+
+        /// <summary>
+        /// A list of all the tokens the lexer has produced
+        /// </summary>
         List<Token> Tokens;
+
+        /// <summary>
+        /// Storage for the current token the lexer is producing
+        /// </summary>
         Token CurrentToken;
 
+        /// <summary>
+        /// Displays an error on screen when something isn't correct
+        /// </summary>
+        /// <param name="message">The base message to produce</param>
+        /// <param name="lineStart">The line the error occured on</param>
+        /// <param name="column">The number of characters across the line the error occurred</param>
         public static void Error(String message, Int32 lineStart, Int32 column)
         {
             Console.WriteLine(message + " Line: " + lineStart + " Col: " + column);
@@ -23,6 +56,7 @@ namespace esper_compiler.src
         /// <summary>
         /// Opens the code file and stores in the variable Program
         /// </summary>
+        /// <param name="fileName">The file to read the code from</param>
         public void OpenProgram(String fileName)
         {
             System.IO.TextReader textReader = new System.IO.StreamReader(fileName);
@@ -44,19 +78,22 @@ namespace esper_compiler.src
         /// </summary>
         public void SkipWhitespace()
         {
-            //Skip space
+            //Skip space and/or tabs
             while (" \t".Contains(Program[CharacterPosition]))
             {
+                //New line encountered, stop skipping
                 if (Program[CharacterPosition].Equals('\n'))
                 {
                     break;
                 }
+
                 CharacterPosition++;
             }
 
             //Skip comments
             if (Program[CharacterPosition].Equals('/') && Program[CharacterPosition+1].Equals('/'))
             {
+                //New line encountered, end of comment
                 while (Program[CharacterPosition] != '\n')
                     CharacterPosition++;
             }
@@ -67,6 +104,7 @@ namespace esper_compiler.src
         /// </summary>
         TokenType GetIdentifier()
         {
+            //While the character is alphanumeric or an underscore, append it to the identifier's name
             do
             {
                 CurrentToken.Value += char.ToUpper(Program[CharacterPosition]);
@@ -81,11 +119,12 @@ namespace esper_compiler.src
         /// <summary>
         /// Gets the number type of token
         /// </summary>
-        /// <returns></returns>
         TokenType GetNumber()
         {
+            //Whether the number being read is a decimal or an integer
             bool hasDecimalPlace = false;
 
+            //While a digit being read or first (and only) decimal place being read, add the number to the token
             do
             {
                 if (Program[CharacterPosition].Equals('.'))
@@ -109,6 +148,7 @@ namespace esper_compiler.src
             //Skip quote
             CharacterPosition++;
 
+            //While end quote not found, keep adding to string contents
             do
             {
                 if (Program[CharacterPosition].Equals('\n'))
@@ -118,13 +158,17 @@ namespace esper_compiler.src
 
                 CurrentToken.Value += Program[CharacterPosition];
                 CharacterPosition++;
-            } while (Program[CharacterPosition] != '\"');
+            } 
+            while (Program[CharacterPosition] != '\"');
 
             CharacterPosition++;
             CurrentToken.Type = TokenType.String;
             return TokenType.String;
         }
 
+        /// <summary>
+        /// Gets the character type of token
+        /// </summary>
         TokenType GetCharacter()
         {
             CharacterPosition++;
@@ -134,6 +178,7 @@ namespace esper_compiler.src
                 Error("Expected a character between", LineStart, CharacterPosition - LineStart + 1);
             }
 
+            //Get the character in between the single quotes
             CurrentToken.Value += Program[CharacterPosition];
             CharacterPosition++;
 
@@ -146,10 +191,14 @@ namespace esper_compiler.src
             return TokenType.Character;
         }
 
+        /// <summary>
+        /// Gets the symbol type of token
+        /// </summary>
         TokenType GetSymbol()
         {
             CurrentToken.Value += Program[CharacterPosition];
 
+            //If <= or >= or != or == then read an extra character
             if ("<>!=".Contains(Program[CharacterPosition]) && Program[CharacterPosition + 1].Equals('='))
             {
                 CharacterPosition++;
@@ -161,31 +210,41 @@ namespace esper_compiler.src
             return TokenType.Symbol;
         }
 
+        /// <summary>
+        /// Reads the next token in the program
+        /// </summary>
         TokenType GetNextToken()
         {
             CurrentToken = new Token();
 
             SkipWhitespace();
+
+            //Setup the base of the token
             CurrentToken.LineStart = LineStart;
             CurrentToken.CharacterPosition = CharacterPosition - LineStart + 1;
 
+            //EOL token
             if (Program[CharacterPosition].Equals('\n'))
             {
                 CurrentToken.Type = TokenType.EOL;
                 return TokenType.EOL;
             }
 
+            //Identifier token
             if ((char.IsLetterOrDigit(Program[CharacterPosition])) ||
                 (Program[CharacterPosition].Equals('_') && char.IsLetterOrDigit(Program[CharacterPosition + 1])))
                 return GetIdentifier();
 
+            //Number token
             if ((char.IsDigit(Program[CharacterPosition])) ||
                 (Program[CharacterPosition].Equals('.') && char.IsDigit(Program[CharacterPosition + 1])))
                 return GetNumber();
 
+            //Character token
             if (Program[CharacterPosition].Equals('\"'))
                 return GetString();
 
+            //Symbol token
             if ("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~".Contains(Program[CharacterPosition]))
                 return GetSymbol();
 
@@ -193,6 +252,9 @@ namespace esper_compiler.src
             return TokenType.Unknown;
         }
 
+        /// <summary>
+        /// Translates the code into tokens
+        /// </summary>
         public void PrepareTokensList()
         {
             Tokens = new List<Token>();
@@ -212,6 +274,9 @@ namespace esper_compiler.src
             }
         }
 
+        /// <summary>
+        /// Outputs the tokens in a readable format
+        /// </summary>
         public void PrintTokens()
         {
             foreach (Token token in Tokens)
