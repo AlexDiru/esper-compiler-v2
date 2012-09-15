@@ -1,0 +1,5 @@
+C:\Users\Alex\Dropbox\CleaningSection\esper-compiler\esper-compiler\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Alex\Dropbox\CleaningSection\esper-compiler\esper-compiler\bin\Debug\esper-compiler.exe
+C:\Users\Alex\Dropbox\CleaningSection\esper-compiler\esper-compiler\bin\Debug\esper-compiler.pdb
+C:\Users\Alex\Dropbox\CleaningSection\esper-compiler\esper-compiler\obj\x86\Debug\esper-compiler.exe
+C:\Users\Alex\Dropbox\CleaningSection\esper-compiler\esper-compiler\obj\x86\Debug\esper-compiler.pdb
