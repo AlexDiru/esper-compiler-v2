@@ -1,0 +1,7 @@
+﻿int a
+input a
+print a
+
+string s
+input s
+print s
