@@ -5,24 +5,6 @@ using System.Text;
 
 namespace esper_compiler.src
 {
-    enum TokenType
-    {
-        Identifier,
-        Number,
-        String,
-        Character,
-        Symbol,
-        Unknown,
-        EOL
-    }
-    class Token
-    {
-        public TokenType Type;
-        public String Value;
-        public Int32 LineStart;
-        public Int32 CharacterPosition;
-    }
-
     class Lexer
     {
         public String Program;
@@ -33,8 +15,9 @@ namespace esper_compiler.src
         List<Token> Tokens;
         Token CurrentToken;
 
-        public Lexer()
+        public static void Error(String message, Int32 lineStart, Int32 column)
         {
+            Console.WriteLine(message + " Line: " + lineStart + " Col: " + column);
         }
 
         /// <summary>
@@ -130,7 +113,7 @@ namespace esper_compiler.src
             {
                 if (Program[CharacterPosition].Equals('\n'))
                 {
-                    Error.Write("Expected ending quotation mark in line ", LineStart, CharacterPosition - LineStart + 1);
+                    Error("Expected ending quotation mark in line ", LineStart, CharacterPosition - LineStart + 1);
                 }
 
                 CurrentToken.Value += Program[CharacterPosition];
@@ -148,7 +131,7 @@ namespace esper_compiler.src
 
             if (Program[CharacterPosition].Equals('\n') || Program[CharacterPosition].Equals('\''))
             {
-                Error.Write("Expected a character between", LineStart, CharacterPosition - LineStart + 1);
+                Error("Expected a character between", LineStart, CharacterPosition - LineStart + 1);
             }
 
             CurrentToken.Value += Program[CharacterPosition];
@@ -156,7 +139,7 @@ namespace esper_compiler.src
 
             if (!Program[CharacterPosition].Equals('\''))
             {
-                Error.Write("Expected ending single quote mark", LineStart, CharacterPosition - LineStart + 1);
+                Error("Expected ending single quote mark", LineStart, CharacterPosition - LineStart + 1);
             }
 
             CurrentToken.Type = TokenType.Character;
@@ -206,7 +189,7 @@ namespace esper_compiler.src
             if ("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~".Contains(Program[CharacterPosition]))
                 return GetSymbol();
 
-            Error.Write("Unrecognised Token", LineStart, CharacterPosition - LineStart + 1);
+            Error("Unrecognised Token", LineStart, CharacterPosition - LineStart + 1);
             return TokenType.Unknown;
         }
 
