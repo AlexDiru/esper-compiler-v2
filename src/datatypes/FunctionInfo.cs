@@ -8,7 +8,7 @@ namespace esper_compiler.src.datatypes
     /// <summary>
     /// Contains all the data for a function
     /// </summary>
-    class FunctionInfo
+    public class FunctionInfo
     {
         public String Name;
         public Int32 Type;

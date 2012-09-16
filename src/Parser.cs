@@ -179,7 +179,7 @@ namespace esper_compiler.src
                 NextToken();
 
                 node.Attributes[0] = "FUNCTION";
-                node.Attributes[2] = Database.GetTypeName(node.Value);
+                node.Attributes[2] = Database.GetTypeName(Database.GetFunctionType(node.Value));
 
                 return Database.GetType(node.Attributes[2]);
             }
@@ -199,7 +199,7 @@ namespace esper_compiler.src
             {
                 node = new Node();
                 node.Value = CurrentToken.Value;
-                node.Attributes = "UNARY_OPERATOR";
+                node.Attributes[0] = "UNARY_OPERATOR";
                 NextToken();
 
                 Int32 type = ParseFactorEx(node.Right);
