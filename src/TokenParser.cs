@@ -112,7 +112,7 @@ namespace esper_compiler.src
         public Boolean CheckFunctionIncoming()
         {
             //Starting with a type can mean a function
-            if (!CheckType(Token.Value))
+            if (!Database.CheckType(CurrentToken.Value))
                 return false;
 
             //Record the index of the present token so we look forward and come back again
@@ -133,18 +133,23 @@ namespace esper_compiler.src
             return CurrentToken.Value.Equals("(");
         }
 
+        public Int32 ParseType()
+        {
+            return -1;
+        }
+
         public void ParseDeclaration(ref VariableInfo var)
         {
-            if (!CheckType(CurrentToken.Value))
+            if (!Database.CheckType(CurrentToken.Value))
                 Error("Invalid type", CurrentToken.LineStart, CurrentToken.CharacterPosition);
 
-            VariableType type = ParseType();
+            Int32 type = ParseType();
 
             //Check for validity in name
             if (!CurrentToken.Type.Equals(TokenType.Identifier))
                 Error("Invalid Name: " + CurrentToken.Value, CurrentToken.LineStart, CurrentToken.CharacterPosition);
 
-            if (!CheckValidName(CurrentToken.Value))
+            if (!Database.CheckValidName(CurrentToken.Value))
                 Error("Invalid Name, name already used: " + CurrentToken.Value,
                       CurrentToken.LineStart,
                       CurrentToken.CharacterPosition);

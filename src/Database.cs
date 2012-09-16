@@ -21,21 +21,16 @@ namespace esper_compiler.src
         static List<OperatorInfo> Operators;
         static List<FunctionInfo> Functions;
 
-        public Database()
+        /// <summary>
+        /// Setup database with default types and operators
+        /// </summary>
+        public static void Setup()
         {
             GlobalScope.Id = "_";
             GlobalScope.ParentScope = null;
 
             CurrentScope = GlobalScope;
 
-            Setup();
-        }
-
-        /// <summary>
-        /// Setup database with default types and operators
-        /// </summary>
-        public void Setup()
-        {
             //Setup default types
             Types = new List<TypeInfo>();
             Types.Add(new TypeInfo() { Name = "INT" });
@@ -65,17 +60,17 @@ namespace esper_compiler.src
             Operators.Add(new OperatorInfo("-", true, GetType("VOID"), GetType("DOUBLE"), GetType("DOUBLE"), -1));
         }
 
-        public Boolean IsNumber(Int32 type)
+        public static Boolean IsNumber(Int32 type)
         {
             return new String[] { "DOUBLE", "INT", "CHAR", "FLOAT" }.Contains(Types[type].Name);
         }
 
-        public Boolean CheckTypesAreEqual(Int32 typeOne, Int32 typeTwo)
+        public static Boolean CheckTypesAreEqual(Int32 typeOne, Int32 typeTwo)
         {
             return (typeOne == typeTwo || (IsNumber(typeOne) && IsNumber(typeTwo)));
         }
 
-        public Boolean CheckVarInScope(String Name, Scope scope)
+        public static Boolean CheckVarInScope(String Name, Scope scope)
         {
             foreach (var variable in scope.Variables)
             {
@@ -90,18 +85,18 @@ namespace esper_compiler.src
             return false;
         }
 
-        public Boolean CheckReserved(String name)
+        public static Boolean CheckReserved(String name)
         {
             return new String[] { "NEW", "DELETE", "IF", "ELSE", "WHILE", "RETURN" }.Contains(name);
         }
 
-        public Boolean CheckValidName(String name)
+        public static Boolean CheckValidName(String name)
         {
             return !(CheckVarInScope(name, CurrentScope) || CheckFunction(name) || CheckType(name) ||
                      CheckReserved(name) || CheckOperator(name)) ;
         }
 
-        public Boolean CheckValidOperator(String name, Int32 lType, Int32 rType, Int32 precedance)
+        public static Boolean CheckValidOperator(String name, Int32 lType, Int32 rType, Int32 precedance)
         {
             if (CheckVarInScope(name, CurrentScope) || CheckFunction(name) || CheckType(name) ||
                 CheckReserved(name))
@@ -117,12 +112,12 @@ namespace esper_compiler.src
             return true;
         }
 
-        public Boolean CheckVariable(String name)
+        public static Boolean CheckVariable(String name)
         {
             return CheckVarInScope(name, CurrentScope);
         }
 
-        public Int32 GetVarType(String name, Scope scope)
+        public static Int32 GetVarType(String name, Scope scope)
         {
             foreach (var variable in scope.Variables)
             {
@@ -136,7 +131,7 @@ namespace esper_compiler.src
             return -1;
         }
 
-        public String GetVarId(String name, Scope scope)
+        public static String GetVarId(String name, Scope scope)
         {
             foreach (var variable in scope.Variables)
             {
@@ -150,7 +145,7 @@ namespace esper_compiler.src
             return String.Empty;
         }
 
-        public Boolean CheckFunction(String name)
+        public static Boolean CheckFunction(String name)
         {
             foreach (var function in Functions)
             {
@@ -161,7 +156,7 @@ namespace esper_compiler.src
             return false;
         }
 
-        public Int32 GetFunctionType(String name)
+        public static Int32 GetFunctionType(String name)
         {
             foreach (var function in Functions)
             {
@@ -172,7 +167,7 @@ namespace esper_compiler.src
             return -1;
         }
 
-        public Int32 GetParameterNumber(String functionName)
+        public static Int32 GetParameterNumber(String functionName)
         {
             foreach (var function in Functions)
             {
@@ -183,7 +178,7 @@ namespace esper_compiler.src
             return -1;
         }
 
-        public Boolean CheckParameter(String functionName, String parameterName)
+        public static Boolean CheckParameter(String functionName, String parameterName)
         {
             foreach (var function in Functions)
             {
@@ -200,16 +195,16 @@ namespace esper_compiler.src
             return false;
         }
 
-        public Int32 GetParameterId(String functionName, String parameterName)
+        public static Int32 GetParameterId(String functionName, String parameterName)
         {
             foreach (var function in Functions)
             {
                 if (function.Name.Equals(functionName))
                 {
-                    foreach (var parameter in function.Parameters)
+                    for (int p = 0; p < function.Parameters.Count; p++)
                     {
-                        if (parameter.Name.Equals(parameterName))
-                            return parameter.Id;
+                        if (function.Parameters[p].Name.Equals(parameterName))
+                            return p;
                     }
                     return -1;
                 }
@@ -217,7 +212,7 @@ namespace esper_compiler.src
             return -1;
         }
 
-        public String GetParameterName(String functionName, Int32 paramIndex)
+        public static String GetParameterName(String functionName, Int32 paramIndex)
         {
             foreach (var function in Functions)
             {
@@ -230,7 +225,7 @@ namespace esper_compiler.src
             return String.Empty;
         }
 
-        public Int32 GetParameterType(String functionName, Int32 paramIndex)
+        public static Int32 GetParameterType(String functionName, Int32 paramIndex)
         {
             foreach (var function in Functions)
             {
@@ -243,7 +238,7 @@ namespace esper_compiler.src
             return -1;
         }
 
-        public Int32 GetParameterType(String functionName, String parameterName)
+        public static Int32 GetParameterType(String functionName, String parameterName)
         {
             foreach (var function in Functions)
             {
@@ -262,7 +257,7 @@ namespace esper_compiler.src
             return -1;
         }
 
-        public Boolean CheckType(String name)
+        public static Boolean CheckType(String name)
         {
             foreach (var type in Types)
             {
@@ -272,7 +267,7 @@ namespace esper_compiler.src
             return false;
         }
 
-        public Int32 GetType(String name)
+        public static Int32 GetType(String name)
         {
             for (int i = 0; i < Types.Count; i++)
             {
@@ -282,21 +277,21 @@ namespace esper_compiler.src
             return -1;
         }
 
-        public String GetTypeName(Int32 type)
+        public static String GetTypeName(Int32 type)
         {
             if (type < 0 || type >= Types.Count)
                 return String.Empty;
             return Types[type].Name;
         }
 
-        public Int32 GetNumberOfMembers(Int32 type)
+        public static Int32 GetNumberOfMembers(Int32 type)
         {
             if (type < 0 || type >= Types.Count)
                 return -1;
             return Types[type].Members.Count;
         }
 
-        public Boolean CheckMember(Int32 type, String name)
+        public static Boolean CheckMember(Int32 type, String name)
         {
             if (type < 0 || type >= Types.Count)
                 return false;
@@ -308,19 +303,19 @@ namespace esper_compiler.src
             return false;
         }
 
-        public Int32 GetMemberId(Int32 type, String name)
+        public static Int32 GetMemberId(Int32 type, String name)
         {
             if (type < 0 || type >= Types.Count)
                 return -1;
 
-            for (int m = 0; m < Types[type].Members.Count)
+            for (int m = 0; m < Types[type].Members.Count; m++ )
                 if (Types[type].Members[m].Equals(name))
                     return m;
 
             return -1;
         }
 
-        public String GetMemberName(Int32 type, Int32 memberId)
+        public static String GetMemberName(Int32 type, Int32 memberId)
         {
             if (type < 0 || type >= Types.Count)
                 return String.Empty;
@@ -328,7 +323,7 @@ namespace esper_compiler.src
             return Types[type].Members[memberId].Name;
         }
 
-        public Int32 GetMemberType(Int32 type, Int32 memberId)
+        public static Int32 GetMemberType(Int32 type, Int32 memberId)
         {
             if (type < 0 || type >= Types.Count)
                 return -1;
@@ -336,7 +331,7 @@ namespace esper_compiler.src
             return Types[type].Members[memberId].Type;
         }
 
-        public Int32 GetMemberType(Int32 type, String name)
+        public static Int32 GetMemberType(Int32 type, String name)
         {
             if (type < 0 || type >= Types.Count)
                 return -1;
@@ -348,7 +343,7 @@ namespace esper_compiler.src
             return -1;
         }
 
-        public Boolean CheckOperator(String name)
+        public static Boolean CheckOperator(String name)
         {
             foreach (var op in Operators)
             {
@@ -358,7 +353,7 @@ namespace esper_compiler.src
             return false;
         }
 
-        public Boolean CheckOperator(String name, Int32 precedance)
+        public static Boolean CheckOperator(String name, Int32 precedance)
         {
             foreach (var op in Operators)
             {
@@ -368,7 +363,7 @@ namespace esper_compiler.src
             return false;
         }
 
-        public Boolean CheckUnaryOperator(String name, Boolean pre)
+        public static Boolean CheckUnaryOperator(String name, Boolean pre)
         {
             foreach (var op in Operators)
             {
@@ -379,7 +374,7 @@ namespace esper_compiler.src
             return false;
         }
 
-        public Int32 GetReturnType(String opName, Int32 lType, Int32 rType, Int32 precedance)
+        public static Int32 GetReturnType(String opName, Int32 lType, Int32 rType, Int32 precedance)
         {
             foreach (var op in Operators)
             {
@@ -390,7 +385,7 @@ namespace esper_compiler.src
             return -1;
         }
 
-        public Int32 GetReturnType(String opName, Int32 type, Boolean pre)
+        public static Int32 GetReturnType(String opName, Int32 type, Boolean pre)
         {
             foreach (var op in Operators)
             {
@@ -403,44 +398,44 @@ namespace esper_compiler.src
             return -1;
         }
 
-        public Int32 AddType(TypeInfo type)
+        public static Int32 AddType(TypeInfo type)
         {
             Types.Add(type);
             return Types.Count - 1;
         }
 
-        public void ChangeType(Int32 typeIndex, TypeInfo type)
+        public static void ChangeType(Int32 typeIndex, TypeInfo type)
         {
             Types[typeIndex] = type;
         }
 
-        public void AddTypeNewFunc(Int32 typeIndex, FunctionInfo func)
+        public static void AddTypeNewFunc(Int32 typeIndex, FunctionInfo func)
         {
             Types[typeIndex].NewFunction = func;
         }
 
-        public void AddTypeDelFunc(Int32 typeIndex, FunctionInfo func)
+        public static void AddTypeDelFunc(Int32 typeIndex, FunctionInfo func)
         {
             Types[typeIndex].DeleteFunction = func;
         }
 
-        public void AddOperator(OperatorInfo op)
+        public static void AddOperator(OperatorInfo op)
         {
             Operators.Add(op);
         }
 
-        public void AddFunction(FunctionInfo func)
+        public static void AddFunction(FunctionInfo func)
         {
             Functions.Add(func);
         }
 
-        public void AddVar(VariableInfo var, Scope scope)
+        public static void AddVar(VariableInfo var, Scope scope)
         {
             var.Id = scope.Id + var.Name;
             scope.Variables.Add(var);
         }
 
-        public void NewScope()
+        public static void NewScope()
         {
             Scope scope = new Scope();
             scope.ParentScope = CurrentScope;
@@ -449,12 +444,12 @@ namespace esper_compiler.src
             CurrentScope = scope;
         }
 
-        public void ParentScope()
+        public static void ParentScope()
         {
             CurrentScope = CurrentScope.ParentScope;
         }
 
-        public void AddFunctionToScope(String functionName)
+        public static void AddFunctionToScope(String functionName)
         {
             foreach (var function in Functions)
             {
@@ -469,7 +464,7 @@ namespace esper_compiler.src
             }
         }
 
-        public void AddOperatorFunctionToScope(String opName)
+        public static void AddOperatorFunctionToScope(String opName)
         {
             foreach (var op in Operators)
             {
@@ -484,7 +479,7 @@ namespace esper_compiler.src
             }
         }
 
-        public void AddTypeFunctionToScope(Int32 type, String functionName)
+        public static void AddTypeFunctionToScope(Int32 type, String functionName)
         {
             if (functionName.Equals("NEW"))
             {
@@ -504,7 +499,7 @@ namespace esper_compiler.src
             }
         }
 
-        public void PrintOutTypes()
+        public static void PrintOutTypes()
         {
             foreach (var type in Types)
             {
@@ -518,7 +513,7 @@ namespace esper_compiler.src
             }
         }
 
-        public void PrintOutGlobals()
+        public static void PrintOutGlobals()
         {
             foreach (var variable in CurrentScope.Variables)
             {
@@ -527,7 +522,7 @@ namespace esper_compiler.src
             }
         }
 
-        public void PrintOutFunctions()
+        public static void PrintOutFunctions()
         {
             foreach (var function in Functions)
             {
@@ -544,7 +539,7 @@ namespace esper_compiler.src
             }
         }
 
-        public void PrintOutOperators()
+        public static void PrintOutOperators()
         {
             foreach (var op in Operators)
             {
@@ -552,7 +547,7 @@ namespace esper_compiler.src
                 Console.Write("\n\tRetType: " + op.RetType);
                 Console.Write("\n\tLType: " + op.LType);
                 Console.Write("\n\tRType: " + op.RType);
-                Console.Write("\n\tPrecedence: " op.Precedance);
+                Console.Write("\n\tPrecedence: " + op.Precedance);
             }
         }
     }
