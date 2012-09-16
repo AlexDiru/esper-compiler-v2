@@ -28,7 +28,7 @@ namespace esper_compiler.src
                 Error("Invalid Type Name", CurrentToken.LineStart);
 
             //Set type info
-            TypeInfo type;
+            TypeInfo type = new TypeInfo();
             type.Name = CurrentToken.Value;
             
             //Keep a record of all the members to ensure none are repeated
@@ -62,9 +62,7 @@ namespace esper_compiler.src
                 //If the next token isn't a semicolon we have an error
                 if (CurrentToken.Value != ";")
                 {
-                    Error("Expected semicolon (inserting in temporarily", CurrentToken.LineStart);
-                    //Recover from error
-                    Tokens.Insert(TokenIndex - 1, new Token() { Value = ";" });
+                    Error("Expected semicolon", CurrentToken.LineStart);
                 }
 
                 NextToken();
@@ -92,7 +90,7 @@ namespace esper_compiler.src
         /// </summary>
         public void ParseTypesDeclarations()
         {
-            for (int Line = 0; Line < Lines; Line++)
+            for (int Line = 0; Line < Lines && CurrentToken != null; Line++)
             {
                 if (CurrentToken.Value != ";")
                 {
@@ -109,19 +107,13 @@ namespace esper_compiler.src
                         ParseTypeDeclaration();
                 }
 
-                if (CurrentToken.Value != ";")
-                {
-                    Error("Expected semicolon (attempting recovery)", CurrentToken.LineStart);
-                    Tokens.Insert(TokenIndex - 1, new Token() { Value = ";" });
-                }
-
                 NextToken();
             }
         }
 
         public void ParseGlobalVariableDeclarations()
         {
-            for (int Line = 0; Line < Lines; Line++)
+            for (int Line = 0; Line < Lines && CurrentToken != null; Line++)
             {
                 if (CurrentToken.Value != ";")
                 {
@@ -135,12 +127,6 @@ namespace esper_compiler.src
                         ParseDeclaration(ref var);
                         Database.AddVariable(var, null);
                     }
-                }
-
-                if (CurrentToken.Value != ";")
-                {
-                    Error("Expected semicolon (attempting recovery)", CurrentToken.LineStart);
-                    Tokens.Insert(TokenIndex - 1, new Token() { Value = ";" });
                 }
 
                 NextToken();
@@ -202,26 +188,30 @@ namespace esper_compiler.src
 
         public void ParseFunctionDeclarations()
         {
-            for (int Line = 0; Line < Lines; Line++)
+            for (int Line = 0; Line < Lines && CurrentToken != null; Line++)
             {
                 if (CurrentToken.Value != ";")
                     if (CheckFunctionIncoming())
                         ParseFunction();
-                
-                if (CurrentToken.Value != ";")
-                {
-                    Error("Expected semicolon (attempting recovery)", CurrentToken.LineStart);
-                    Tokens.Insert(TokenIndex - 1, new Token() { Value = ";" });
-                }
-
-                NextToken();
             }
         }
 
+        public void Preparse()
+        {
+            ResetToken();
+            ParseTypesDeclarations();
+            ResetToken();
+            ParseGlobalVariableDeclarations();
+            ResetToken();
+            ParseFunctionDeclarations();
+        }
 
-        //Function syntax
-        //FUNCTION ::= 'Function', TYPE, IDENTIFIER, '(', PARAMETER_LIST, ')' '{' STATEMENT_LIST '}'
-        //PARAMETER_LIST ::= PARAMETER | PARAMETER ',' PARAMETER_LIST
-        //PARAMETER ::= TYPE IDENTIFIER
+        public void PrintOut()
+        {
+            Database.PrintOutTypes();
+            Database.PrintOutGlobals();
+            Database.PrintOutFunctions();
+            Database.PrintOutOperators();
+        }
     }
 }

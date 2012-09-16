@@ -23,7 +23,7 @@ namespace esper_compiler.src
         /// <summary>
         /// The number of lines in the program
         /// </summary>
-        protected Int32 Lines;
+        static protected Int32 Lines;
 
         /// <summary>
         /// A list of all the tokens the lexer has produced
@@ -33,7 +33,7 @@ namespace esper_compiler.src
         /// <summary>
         /// Storage for the current token the lexer is producing
         /// </summary>
-        protected Token CurrentToken;
+        static protected Token CurrentToken;
 
         /// <summary>
         /// Moves onto the next token
@@ -41,6 +41,25 @@ namespace esper_compiler.src
         protected void NextToken()
         {
             TokenIndex++;
+            try
+            {
+                CurrentToken = Tokens[TokenIndex];
+            }
+            catch
+            {
+                CurrentToken.Value = ";";
+                CurrentToken.LineStart = Int32.MaxValue;
+                CurrentToken.Type = TokenType.Symbol;
+            }
+        }
+
+        /// <summary>
+        /// Resets the tokens
+        /// </summary>
+        protected void ResetToken()
+        {
+            TokenIndex = 0;
+            CurrentToken = Tokens[TokenIndex];
         }
 
         /// <summary>
@@ -95,10 +114,10 @@ namespace esper_compiler.src
 
                 if (CurrentToken.Value.Equals("}"))
                 {
-                    blockNumber++;
+                    blockNumber--;
                 }
 
-                if (Line >= Lines)
+                if (CurrentToken.LineStart >= Lines)
                     Error("Invalid file ending: expected '}'", CurrentToken.LineStart);
 
                 NextToken();
@@ -128,14 +147,25 @@ namespace esper_compiler.src
 
             //A '(' after a type name mean's the function's parameter list is incoming, so this is a function
             //declaration
+            Boolean retVal;
+            retVal = CurrentToken.Value.Equals("(");
+
             //Reset the tokenIndex
             TokenIndex = currentIndex;
-            return CurrentToken.Value.Equals("(");
+            CurrentToken = Tokens[currentIndex];
+            return retVal;
         }
 
         public Int32 ParseType()
         {
-            return -1;
+            Int32 type = Database.GetType(CurrentToken.Value);
+
+            if (type == -1)
+                Error("Invalid type", CurrentToken.LineStart, CurrentToken.CharacterPosition);
+
+            NextToken();
+
+            return type;
         }
 
         public void ParseDeclaration(ref VariableInfo var)

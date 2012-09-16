@@ -13,5 +13,11 @@ namespace esper_compiler.src
 
         //Scope ID to prefix variable IDs
         public String Id;
+
+        public Scope()
+        {
+            ChildScope = new List<Scope>();
+            Variables = new List<VariableInfo>();
+        }
     }
 }

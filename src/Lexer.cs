@@ -237,7 +237,7 @@ namespace esper_compiler.src
                 GetNextToken();
                 if (CurrentToken.Type == TokenType.EOL)
                 {
-                    LineStart = CharacterPosition + 1;
+                    LineStart = Line;
                     Line++;
                     CharacterPosition++;
                 }
@@ -259,7 +259,7 @@ namespace esper_compiler.src
         {
             foreach (Token token in Tokens)
             {
-                Console.Write("(" + token.Value + ", " + token.Type.ToString() + ") ");
+                Console.Write("(" + token.Value + ", " + token.Type.ToString() + ", LINE = " + token.LineStart + ") ");
             }
         }
     }

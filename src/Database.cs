@@ -15,11 +15,11 @@ namespace esper_compiler.src
     /// </summary>
     static class Database
     {
-        static Scope GlobalScope;
+        static Scope GlobalScope = new Scope();
         static Scope CurrentScope;
-        static List<TypeInfo> Types;
-        static List<OperatorInfo> Operators;
-        static List<FunctionInfo> Functions;
+        static List<TypeInfo> Types = new List<TypeInfo>();
+        static List<OperatorInfo> Operators = new List<OperatorInfo>();
+        static List<FunctionInfo> Functions = new List<FunctionInfo>();
 
         /// <summary>
         /// Setup database with default types and operators
@@ -546,7 +546,13 @@ namespace esper_compiler.src
         /// </summary>
         public static void AddVariable(VariableInfo var, Scope scope)
         {
-            var.Id = scope.Id + var.Name;
+            if (scope != null)
+                var.Id = scope.Id + var.Name;
+            else
+            {
+                scope = CurrentScope;
+                var.Id = var.Name;
+            }
             scope.Variables.Add(var);
         }
 
@@ -653,7 +659,7 @@ namespace esper_compiler.src
         {
             foreach (var variable in CurrentScope.Variables)
             {
-                Console.Write("FOUND GLOBAL VARIABLE");
+                Console.Write("\n\tFOUND GLOBAL VARIABLE");
                 Console.Write("\n\t\t" + variable.Name + "==>" + GetTypeName(variable.Type));
             }
         }
@@ -665,7 +671,7 @@ namespace esper_compiler.src
         {
             foreach (var function in Functions)
             {
-                Console.Write("FOUND FUNCTION: " + function.Name);
+                Console.Write("\n\tFOUND FUNCTION: " + function.Name);
                 Console.Write("\n\t\tType: " + GetTypeName(function.Type));
 
                 if (function.Parameters.Count > 0)

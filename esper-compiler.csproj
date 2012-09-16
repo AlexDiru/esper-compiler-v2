@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="esper-code\boolean-algebra.esp" />
+    <None Include="esper-code\functions.esp" />
     <None Include="esper-code\hello-world.esp" />
     <None Include="esper-code\user-input.esp" />
   </ItemGroup>
