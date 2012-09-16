@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace esper_compiler.src
+namespace esper_compiler.src.datatypes
 {
     /// <summary>
     /// Contains all the data for a function

@@ -44,17 +44,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\Database.cs" />
-    <Compile Include="src\FunctionInfo.cs" />
+    <Compile Include="src\datatypes\FunctionInfo.cs" />
     <Compile Include="src\Lexer.cs" />
-    <Compile Include="src\OperatorInfo.cs" />
+    <Compile Include="src\datatypes\OperatorInfo.cs" />
     <Compile Include="src\Preparser.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Scope.cs" />
-    <Compile Include="src\Token.cs" />
+    <Compile Include="src\datatypes\Scope.cs" />
+    <Compile Include="src\datatypes\Token.cs" />
     <Compile Include="src\TokenParser.cs" />
-    <Compile Include="src\TypeInfo.cs" />
-    <Compile Include="src\VariableInfo.cs" />
+    <Compile Include="src\datatypes\TypeInfo.cs" />
+    <Compile Include="src\datatypes\VariableInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="esper-code\boolean-algebra.esp" />

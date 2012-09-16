@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using esper_compiler.src.datatypes;
+
 namespace esper_compiler.src
 {
-
-    
-
     /// <summary>
     /// Base class containing functions all the parsers use
     /// </summary>

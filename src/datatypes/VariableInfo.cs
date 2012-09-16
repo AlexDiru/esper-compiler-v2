@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace esper_compiler.src
+namespace esper_compiler.src.datatypes
 {
-    class VariableInfo
+    public class VariableInfo
     {
         public String Name;
         public Int32 Type;

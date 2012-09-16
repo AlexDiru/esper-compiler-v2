@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace esper_compiler.src
+namespace esper_compiler.src.datatypes
 {
-    enum TokenType
+    public enum TokenType
     {
         Identifier,
         Number,
@@ -16,7 +16,7 @@ namespace esper_compiler.src
         EOL
     }
 
-    class Token
+    public class Token
     {
         /// <summary>
         /// The type of the token
