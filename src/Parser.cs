@@ -81,11 +81,6 @@ namespace esper_compiler.src
             return memberType;
         }
 
-        private int ParseExpression(Node node, int p)
-        {
-            throw new NotImplementedException();
-        }
-
         private Int32 ParseVariableFactor(Node node)
         {
             //Not an identifier or variable name
@@ -191,6 +186,54 @@ namespace esper_compiler.src
                 return ParseVariableFactor(node);
 
             return -1;
+        }
+
+        /// <summary>
+        /// Factors can be prefixed or postfixed with unary operators
+        /// </summary>
+        private Int32 ParseFactorEx(Node node)
+        {
+            //If a pre-unary operator exists
+            if (Database.CheckUnaryOperator(CurrentToken.Value, true))
+            {
+                node = new Node();
+                node.Value = CurrentToken.Value;
+                node.Attributes = "UNARY_OPERATOR";
+                NextToken();
+
+                Int32 type = ParseFactorEx(node.Right);
+                node.Attributes[2] = Database.GetTypeName(Database.GetReturnType(node.Value, type, true));
+                return Database.GetType(node.Attributes[2]);
+            }
+
+            //No more pre-operators, parse the actual factor
+            ParseFactor(node);
+
+            //Check for post-unary operators
+            while (Database.CheckUnaryOperator(CurrentToken.Value, false))
+            {
+                Node temp;
+                temp = node;
+                node.Left = new Node();
+                node.Left = temp;
+
+                node.Value = CurrentToken.Value;
+                node.Attributes[0] = "UNARY_OPERATOR";
+                NextToken();
+
+                Int32 type = Database.GetReturnType(node.Value, 
+                                                    Database.GetType(node.Left.Attributes[2]), 
+                                                    false);
+
+                node.Attributes[2] = Database.GetTypeName(type);
+            }
+
+            return Database.GetType(node.Attributes[2]);
+        }
+
+        private Int32 ParseExpression(Node node, int p)
+        {
+            throw new NotImplementedException();
         }
     }
 }
