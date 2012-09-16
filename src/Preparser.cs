@@ -17,7 +17,7 @@ namespace esper_compiler.src
         /// Syntax:
         /// struct type_name
         /// {
-        ///     mem_type mem_name;
+        ///     datatype identifier;
         ///     ...
         /// }
         /// </summary>
@@ -115,6 +115,11 @@ namespace esper_compiler.src
             }
         }
 
+        /// <summary>
+        /// Parses all global variable declarations (not in functions or structs)
+        /// Syntax:
+        /// datatype identifier;
+        /// </summary>
         public void ParseGlobalVariableDeclarations()
         {
             for (int Line = 0; Line < Lines && CurrentToken != null; Line++)
@@ -138,6 +143,14 @@ namespace esper_compiler.src
             }
         }
 
+        /// <summary>
+        /// Parses a function declaration
+        /// Syntax:
+        /// returntype identifer ( param_list )
+        /// {
+        ///     statements
+        /// }
+        /// </summary>
         public FunctionInfo ParseFunctionDeclaration()
         {
             Int32 type = -1;
@@ -185,12 +198,18 @@ namespace esper_compiler.src
             return func;
         }
 
+        /// <summary>
+        /// Parses a function and inserts it in the database
+        /// </summary>
         public void ParseFunction()
         {
             Database.AddFunction(ParseFunctionDeclaration());
             SkipBlock();
         }
 
+        /// <summary>
+        /// Parses all function declarations in the program
+        /// </summary>
         public void ParseFunctionDeclarations()
         {
             while (true)
@@ -206,6 +225,9 @@ namespace esper_compiler.src
             }
         }
 
+        /// <summary>
+        /// Does all the preparsing of the three sections
+        /// </summary>
         public void Preparse()
         {
             ResetToken();
@@ -216,6 +238,9 @@ namespace esper_compiler.src
             ParseFunctionDeclarations();
         }
 
+        /// <summary>
+        /// Outputs the result from preparsing
+        /// </summary>
         public void PrintOut()
         {
             Database.PrintOutTypes();
