@@ -11,6 +11,7 @@ namespace esper_compiler.src
     {
         private Node Root;
         private readonly Int32 MaxPrecedenceLevel;
+        private static Int32 RetType;
 
         public Parser()
         {
@@ -317,6 +318,223 @@ namespace esper_compiler.src
 
         private void ParseBlock(Node node)
         {
+            //A block is a number of statements enclosed in {...}
+            if (CurrentToken.Value.Equals("{"))
+            {
+                //Each block starts a new scope
+                Database.NewScope();
+                NextToken();
+
+                ParseStatements(node);
+
+                if (!CurrentToken.Value.Equals("}"))
+                    Error("Expected ending of the block: }", CurrentToken.LineStart);
+
+                Database.ParentScope();
+            }
+            //Or it can just be a single statement
+            else
+                ParseStatement(node);
+        }
+
+        private void ParseWhile(Node node)
+        {
+            node = new Node();
+            node.Value = "WHILE";
+
+            NextToken();
+
+            if (!CurrentToken.Value.Equals("("))
+                Error("Enclose the condition in (...)", CurrentToken.LineStart);
+
+            NextToken();
+
+            if (ParseExpression(node.Left, 0) != Database.GetType("BOOL"))
+                Error("Expression must be a boolean in the while", CurrentToken.LineStart);
+
+            if (!CurrentToken.Value.Equals(")"))
+                Error("Enclose the condition in (...)", CurrentToken.LineStart);
+
+            NextToken();
+
+            ParseBlock(node.Right);
+        }
+
+        private void ParseIf(Node node)
+        {
+            node = new Node();
+            node.Value = "IF";
+
+            NextToken();
+
+            if (!CurrentToken.Value.Equals("("))
+                Error("Enclose the condition in (...)", CurrentToken.LineStart);
+
+            NextToken();
+
+            if (ParseExpression(node.Left, 0) != Database.GetType("BOOL"))
+                Error("IF expressions must be boolean in type", CurrentToken.LineStart);
+
+            if (!CurrentToken.Value.Equals(")"))
+                Error("Enclose the condition in (...)", CurrentToken.LineStart);
+
+            NextToken();
+
+            ParseBlock(node.Right);
+
+            //If followed by an else statement, parse the else tree
+            //Node's value is else
+            //If -> Else If then left and right are both if trees
+            //If -> Else, left child is previous IF tree and right child is the series of else statements
+            NextToken();
+            if (CurrentToken.Value.Equals("ELSE"))
+            {
+                NextToken();
+                NextToken();
+                Node temp = node;
+                node.Left = new Node();
+                node.Left = temp;
+                node.Value = "ELSE";
+
+                if (CurrentToken.Value.Equals("IF"))
+                    ParseIf(node.Right);
+                else
+                    ParseBlock(node.Right);
+            }
+        }
+
+        private void ParseReturn(Node node)
+        {
+            node = new Node();
+            node.Value = "RETURN";
+
+            NextToken();
+            
+            if (RetType != Database.GetType("VOID"))
+            {
+                if (!Database.CheckTypesAreEqual(ParseExpression(node.Right, 0), RetType))
+                {
+                    Error("Return and function types mistmatched", CurrentToken.LineStart);
+                }
+            }
+        }
+
+        private void ParseVariableDeclaration(Node node)
+        {
+            VariableInfo var = new VariableInfo();
+
+            ParseDeclaration(ref var);
+
+            node = new Node();
+            node.Value = "DECLARE";
+
+            node.Attributes[0] = Database.GetVarId(var.Name, null);
+            node.Attributes[1] = Database.GetTypeName(var.Type);
+        }
+
+        private Boolean CheckAssignComing()
+        {
+            //If a variable, return true
+            return Database.CheckVariable(CurrentToken.Value);
+        }
+
+        private void ParseStatement(Node node)
+        {
+            //Check the first token to determine what to do
+            if (CurrentToken.Value.Equals("IF"))
+                ParseIf(node);
+            else if (CurrentToken.Value.Equals("WHILE"))
+                ParseWhile(node);
+            else if (CurrentToken.Value.Equals("RETURN"))
+                ParseReturn(node);
+            else if (Database.CheckType(CurrentToken.Value))
+                ParseVariableDeclaration(node);
+            else if (CheckAssignComing())
+                ParseAssign(node);
+            else
+                Error("Unknown statement", CurrentToken.LineStart);
+        }
+
+        private void ParseStatements(Node node)
+        {
+            if (CurrentToken.Value.Equals("}"))
+                return;
+
+            node = new Node();
+            node.Value = "STATEMENT";
+
+            if (!CurrentToken.Value.Equals(";"))
+                ParseStatement(node.Left);
+
+            if (!CurrentToken.Value.Equals(";"))
+                Error("Expected semicolon", CurrentToken.LineStart);
+
+            ParseStatements(node.Right);
+        }
+
+        private void ParseFunction(Node node)
+        {
+            RetType = ParseType();
+
+            node.Value = "FUNCTION";
+            node.Attributes[0] = CurrentToken.Value;
+
+            Database.AddFunctionToScope(CurrentToken.Value);
+
+            //Skip parameter list - preparser took care of this
+            while (!CurrentToken.Value.Equals(")"))
+                NextToken();
+
+            NextToken();
+
+            //{ must exist
+            if (!CurrentToken.Value.Equals("{"))
+                Error("Expected function block {...}", CurrentToken.LineStart);
+
+            NextToken();
+
+            ParseStatements(node.Left);
+
+            if (!CurrentToken.Value.Equals("{"))
+                Error("Invalid ending: expected '}'", CurrentToken.LineStart);
+
+            NextToken();
+        }
+
+
+        private void ParseFunctionsDefinitions(Node node)
+        {
+            RetType = -1;
+            Node currentNode;
+
+            Boolean firstFunc = true;
+
+            ResetToken();
+
+            while (CurrentToken.LineStart != Int32.MaxValue)
+            {
+                if (CheckFunctionIncoming())
+                {
+                    Database.NewScope();
+
+                    if (firstFunc)
+                    {
+                        node = new Node();
+                        currentNode = node;
+                        firstFunc = false;
+                    }
+                    else
+                    {
+                        node.Right = new Node();
+                        node = node.Right;
+                    }
+
+                    ParseFunction(node);
+
+                    Database.ParentScope();
+                }
+                NextToken();
+            }
         }
     }
 }
