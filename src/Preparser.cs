@@ -13,7 +13,7 @@ namespace esper_compiler.src
         /// <summary>
         /// Parse a type
         /// Syntax:
-        /// TYPE type_name
+        /// struct type_name
         /// {
         ///     mem_type mem_name;
         ///     ...
@@ -45,6 +45,8 @@ namespace esper_compiler.src
                 SkipBlock();
                 NextToken();
             }
+
+            NextToken();
 
             //Get member declarations
             do
@@ -99,7 +101,7 @@ namespace esper_compiler.src
                     {
                         SkipBlock();
                     }
-                    else if (!CurrentToken.Value.Equals("TYPE"))
+                    else if (!CurrentToken.Value.Equals("STRUCT"))
                         //No type found
                         continue;
                     else
@@ -117,9 +119,10 @@ namespace esper_compiler.src
             {
                 if (CurrentToken.Value != ";")
                 {
-                    if (CurrentToken.Value.Equals("TYPE") || CheckFunctionIncoming())
+                    if (CurrentToken.Value.Equals("STRUCT") || CheckFunctionIncoming())
                     {
                         SkipBlock();
+                        PreviousToken();
                     }
                     else if (Database.CheckType(CurrentToken.Value))
                     {
@@ -188,11 +191,16 @@ namespace esper_compiler.src
 
         public void ParseFunctionDeclarations()
         {
-            for (int Line = 0; Line < Lines && CurrentToken != null; Line++)
+            while (true)
             {
                 if (CurrentToken.Value != ";")
                     if (CheckFunctionIncoming())
                         ParseFunction();
+
+                NextToken();
+
+                if (CurrentToken.LineStart.Equals(Int32.MaxValue))
+                    break;
             }
         }
 

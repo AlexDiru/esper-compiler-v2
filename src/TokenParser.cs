@@ -53,6 +53,12 @@ namespace esper_compiler.src
             }
         }
 
+        protected void PreviousToken()
+        {
+            TokenIndex--;
+            CurrentToken = Tokens[TokenIndex];
+        }
+
         /// <summary>
         /// Resets the tokens
         /// </summary>
