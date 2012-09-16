@@ -241,7 +241,82 @@ namespace esper_compiler.src
             //Parse another expression of higher precedence and set it to LType
             Int32 lType = ParseExpression(node, precedenceLevel+1);
 
-            return 0;
+            Int32 temporaryToken;
+
+            //Check if an operator of current precedence level exists
+            while (Database.CheckOperator(CurrentToken.Value, precedenceLevel))
+            {
+                //An operator exists but it may not be what we want, mark the token in case we want
+                //to return to it
+                temporaryToken = TokenIndex;
+
+                //Then the operator is the node and the previously parsed expression is the left child node
+                String op = CurrentToken.Value;
+
+                Node temp;
+                temp = node;
+                node.Left = new Node();
+                node.Left = temp;
+
+                node.Value = op;
+                node.Attributes[0] = "OPERATOR";
+                NextToken();
+
+                //Right child node is the other expression of high precedence level
+                Int32 rType = ParseExpression(node.Right, precedenceLevel + 1);
+
+                //Return type retrieved from database
+                Int32 retType = Database.GetReturnType(op, lType, rType, precedenceLevel);
+
+                //Catch here
+                //If retType == -1 then the operator with LType, RType and Precedence level DO NOT exist
+                //There may exist an operator with such LType and RType but a different precedence level
+                //do not match
+                //In such case, we parsed the operator in the wrong precedence level
+                //We have to reset the previously saved token's position and also the expression tree
+                if (retType.Equals(-1))
+                {
+                    node.Right = null;
+                    node = temp;
+                    TokenIndex = temporaryToken;
+                    break;
+                }
+
+                //Valid return type is the type of the expression
+                node.Attributes[2] = Database.GetTypeName(retType);
+                lType = retType;
+            }
+
+            return lType;
+        }
+
+        private void ParseAssign(Node node)
+        {
+            node = new Node();
+            node.Value = "ASSIGN";
+            node.Left = new Node();
+
+            //Parse the variable
+            Int32 type = ParseVariableFactor(node.Left);
+
+            node.Attributes[2] = Database.GetTypeName(type);
+
+            //Assignment statement must be followed by an equal sign
+            if (CurrentToken.Value != "=")
+                Error("Expected assignment operator: =", CurrentToken.LineStart);
+
+            NextToken();
+
+            //Expression is on the right child
+            Int32 exprType = ParseExpression(node.Right, 0);
+
+            //Check type match between variable and expression
+            if (!Database.CheckTypesAreEqual(exprType, type))
+                Error("Assignment types mismatched", CurrentToken.LineStart);
+        }
+
+        private void ParseBlock(Node node)
+        {
         }
     }
 }
