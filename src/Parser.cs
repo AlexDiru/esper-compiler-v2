@@ -10,6 +10,7 @@ namespace esper_compiler.src
     class Parser : TokenParser
     {
         private Node Root;
+        private readonly Int32 MaxPrecedenceLevel;
 
         public Parser()
         {
@@ -231,9 +232,16 @@ namespace esper_compiler.src
             return Database.GetType(node.Attributes[2]);
         }
 
-        private Int32 ParseExpression(Node node, int p)
+        private Int32 ParseExpression(Node node, int precedenceLevel)
         {
-            throw new NotImplementedException();
+            //If we have reached over the maximum precedence level, we need to parse a factor
+            if (precedenceLevel > MaxPrecedenceLevel)
+                return ParseFactorEx(node);
+
+            //Parse another expression of higher precedence and set it to LType
+            Int32 lType = ParseExpression(node, precedenceLevel+1);
+
+            return 0;
         }
     }
 }
