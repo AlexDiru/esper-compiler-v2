@@ -68,6 +68,17 @@ namespace esper_compiler.src
         }
 
         /// <summary>
+        /// Outputs the tokens in a readable format
+        /// </summary>
+        public void PrintTokens()
+        {
+            foreach (Token token in Tokens)
+            {
+                Console.Write("(" + token.Value + ", " + token.Type.ToString() + ", LINE = " + token.LineStart + ") ");
+            }
+        }
+
+        /// <summary>
         /// Displays an error on screen when something isn't correct
         /// </summary>
         /// <param name="message">The base message to produce</param>

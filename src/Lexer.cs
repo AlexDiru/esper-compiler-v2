@@ -246,23 +246,6 @@ namespace esper_compiler.src
                 Tokens.Add(CurrentToken);
             }
 
-            //Since Esper uses semicolons in the same way C style languages use them
-            //New lines only affect the lexical analysis of strings
-            //So after the lexical analysis stage, EOL tokens can be removed
-            for (int tokenIndex = 0; tokenIndex < Tokens.Count; tokenIndex++)
-                if (Tokens[tokenIndex].Type.Equals(TokenType.EOL))
-                    Tokens.RemoveAt(tokenIndex--);
-        }
-
-        /// <summary>
-        /// Outputs the tokens in a readable format
-        /// </summary>
-        public void PrintTokens()
-        {
-            foreach (Token token in Tokens)
-            {
-                Console.Write("(" + token.Value + ", " + token.Type.ToString() + ", LINE = " + token.LineStart + ") ");
-            }
         }
     }
 }

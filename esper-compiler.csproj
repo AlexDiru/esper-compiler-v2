@@ -49,6 +49,7 @@
     <Compile Include="src\Lexer.cs" />
     <Compile Include="src\datatypes\OperatorInfo.cs" />
     <Compile Include="src\Parser.cs" />
+    <Compile Include="src\Postlexer.cs" />
     <Compile Include="src\Preparser.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
