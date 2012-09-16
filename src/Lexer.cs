@@ -5,7 +5,7 @@ using System.Text;
 
 namespace esper_compiler.src
 {
-    class Lexer
+    class Lexer : TokenParser
     {
         /// <summary>
         /// The code of the program
@@ -22,36 +22,7 @@ namespace esper_compiler.src
         /// </summary>
         Int32 LineStart;
 
-        /// <summary>
-        /// The current line the lexer is on
-        /// </summary>
-        Int32 Line;
-
-        /// <summary>
-        /// The number of lines in the program
-        /// </summary>
-        Int32 Lines;
-
-        /// <summary>
-        /// A list of all the tokens the lexer has produced
-        /// </summary>
-        List<Token> Tokens;
-
-        /// <summary>
-        /// Storage for the current token the lexer is producing
-        /// </summary>
-        Token CurrentToken;
-
-        /// <summary>
-        /// Displays an error on screen when something isn't correct
-        /// </summary>
-        /// <param name="message">The base message to produce</param>
-        /// <param name="lineStart">The line the error occured on</param>
-        /// <param name="column">The number of characters across the line the error occurred</param>
-        public static void Error(String message, Int32 lineStart, Int32 column)
-        {
-            Console.WriteLine(message + " Line: " + lineStart + " Col: " + column);
-        }
+        
 
         /// <summary>
         /// Opens the code file and stores in the variable Program
