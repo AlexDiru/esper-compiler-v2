@@ -5,6 +5,9 @@ using System.Text;
 
 namespace esper_compiler.src
 {
+    /// <summary>
+    /// Contains all the data for a function
+    /// </summary>
     class FunctionInfo
     {
         public String Name;

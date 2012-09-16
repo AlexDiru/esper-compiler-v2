@@ -13,7 +13,7 @@ namespace esper_compiler.src
     /// </summary>
     class TokenParser
     {
-        Int32 TokenIndex;
+        protected Int32 TokenIndex;
 
         /// <summary>
         /// The current line the lexer is on
@@ -28,7 +28,7 @@ namespace esper_compiler.src
         /// <summary>
         /// A list of all the tokens the lexer has produced
         /// </summary>
-        protected List<Token> Tokens;
+        static protected List<Token> Tokens;
 
         /// <summary>
         /// Storage for the current token the lexer is producing
