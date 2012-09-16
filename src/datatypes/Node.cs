@@ -20,5 +20,24 @@ namespace esper_compiler.src.datatypes
             Left = Right = null;
             Attributes[0] = Attributes[1] = Attributes[2] = Value = String.Empty;
         }
+
+        public void Print(Node node, String dash)
+        {
+            Console.Write("\n" + dash + "-> " + node.Value);
+
+            String attributes = "";
+
+            if (node.Attributes[0] != "")
+                attributes += " " + node.Attributes[0] + ",";
+            if (node.Attributes[1] != "")
+                attributes += " " + node.Attributes[1] + ",";
+            if (node.Attributes[2] != "")
+                attributes += " " + node.Attributes[2] + ",";
+
+            if (node.Left != null)
+                node.Left.Print(node.Left, dash + "-");
+            if (node.Right != null)
+                node.Right.Print(node.Right, dash + "-");
+        }
     }
 }

@@ -62,6 +62,9 @@ namespace esper_compiler.src
         /// </summary>
         public static Boolean IsNumber(Int32 type)
         {
+            if (type == -1)
+                return false;
+
             return new String[] { "DOUBLE", "INT", "CHAR", "FLOAT" }.Contains(Types[type].Name);
         }
 
@@ -141,6 +144,9 @@ namespace esper_compiler.src
         /// </summary>
         public static Int32 GetVarType(String name, Scope scope)
         {
+            if (scope == null)
+                scope = CurrentScope;
+
             foreach (var variable in scope.Variables)
             {
                 if (variable.Name.Equals(name))
@@ -158,6 +164,9 @@ namespace esper_compiler.src
         /// </summary>
         public static String GetVarId(String name, Scope scope)
         {
+            if (scope == null)
+                scope = CurrentScope;
+
             foreach (var variable in scope.Variables)
             {
                 if (variable.Name.Equals(name))

@@ -9,8 +9,8 @@ namespace esper_compiler.src
 {
     class Parser : TokenParser
     {
-        private Node Root;
-        private readonly Int32 MaxPrecedenceLevel;
+        public Node Root;
+        private readonly Int32 MaxPrecedenceLevel = 6;
         private static Int32 RetType;
 
         public Parser()
@@ -18,7 +18,7 @@ namespace esper_compiler.src
             ResetToken();
         }
 
-        private void ParseParameters(Node node, String functionName, Int32 parameterIndex)
+        private void ParseParameters(ref Node node, String functionName, Int32 parameterIndex)
         {
             //If end of parameter parsing
             if (CurrentToken.Value.Equals(")"))
@@ -28,7 +28,7 @@ namespace esper_compiler.src
             node.Value = "PARAMETER";
 
             //Parse the expression in the node's left child
-            Int32 type = ParseExpression(node.Left, 0);
+            Int32 type = ParseExpression(ref node.Left, 0);
 
             //Check if the types of the expression and parameter match
             if (!Database.CheckTypesAreEqual(type,
@@ -47,11 +47,11 @@ namespace esper_compiler.src
                 if (CurrentToken.Value.Equals(")"))
                     Error("Expected more parameters", CurrentToken.LineStart);
 
-                ParseParameters(node.Right, functionName, parameterIndex + 1);
+                ParseParameters(ref node.Right, functionName, parameterIndex + 1);
             }
         }
 
-        private Int32 ParseMember(Node node, Int32 type)
+        private Int32 ParseMember(ref Node node, Int32 type)
         {
             //The node's value is MEMBER, the left is the parent factor, right the member
             Node current = node;
@@ -76,14 +76,14 @@ namespace esper_compiler.src
 
             //Check if another type is incoming
             if (CurrentToken.Value.Equals("."))
-                memberType = ParseMember(node.Right, memberType);
+                memberType = ParseMember(ref node.Right, memberType);
 
             node.Attributes[2] = Database.GetTypeName(memberType);
 
             return memberType;
         }
 
-        private Int32 ParseVariableFactor(Node node)
+        private Int32 ParseVariableFactor(ref Node node)
         {
             //Not an identifier or variable name
             if (!CurrentToken.Type.Equals(TokenType.Identifier))
@@ -101,18 +101,18 @@ namespace esper_compiler.src
 
             //A . means a member is incoming
             if (CurrentToken.Value.Equals("."))
-                type = ParseMember(node, type);
+                type = ParseMember(ref node, type);
 
             return type;
         }
 
-        private Int32 ParseFactor(Node node)
+        private Int32 ParseFactor(ref Node node)
         {
             //A factor can be an expression in brackets
             if (CurrentToken.Value.Equals("("))
             {
                 NextToken();
-                Int32 type = ParseExpression(node, 0);
+                Int32 type = ParseExpression(ref node, 0);
 
                 if (!CurrentToken.Value.Equals(")"))
                     Error("Expected ending parenthesis: )", CurrentToken.LineStart);
@@ -120,7 +120,7 @@ namespace esper_compiler.src
 
                 //A bracketed expression can also have a member
                 if (CurrentToken.Value.Equals("."))
-                    type = ParseMember(node, type);
+                    type = ParseMember(ref node, type);
 
                 return type;
             }
@@ -173,7 +173,7 @@ namespace esper_compiler.src
                 NextToken();
 
                 if (Database.GetParameterNumber(node.Value) != 0)
-                    ParseParameters(node.Right, node.Value, 0);
+                    ParseParameters(ref node.Right, node.Value, 0);
 
                 if (!CurrentToken.Value.Equals(")"))
                     Error("Expected ending parenthesis: )", CurrentToken.LineStart);
@@ -185,7 +185,7 @@ namespace esper_compiler.src
                 return Database.GetType(node.Attributes[2]);
             }
             else
-                return ParseVariableFactor(node);
+                return ParseVariableFactor(ref node);
 
             return -1;
         }
@@ -193,23 +193,24 @@ namespace esper_compiler.src
         /// <summary>
         /// Factors can be prefixed or postfixed with unary operators
         /// </summary>
-        private Int32 ParseFactorEx(Node node)
+        private Int32 ParseFactorEx(ref Node node)
         {
+            node = new Node();
+
             //If a pre-unary operator exists
             if (Database.CheckUnaryOperator(CurrentToken.Value, true))
             {
-                node = new Node();
                 node.Value = CurrentToken.Value;
                 node.Attributes[0] = "UNARY_OPERATOR";
                 NextToken();
 
-                Int32 type = ParseFactorEx(node.Right);
+                Int32 type = ParseFactorEx(ref node.Right);
                 node.Attributes[2] = Database.GetTypeName(Database.GetReturnType(node.Value, type, true));
                 return Database.GetType(node.Attributes[2]);
             }
 
             //No more pre-operators, parse the actual factor
-            ParseFactor(node);
+            ParseFactor(ref node);
 
             //Check for post-unary operators
             while (Database.CheckUnaryOperator(CurrentToken.Value, false))
@@ -233,14 +234,16 @@ namespace esper_compiler.src
             return Database.GetType(node.Attributes[2]);
         }
 
-        private Int32 ParseExpression(Node node, int precedenceLevel)
+        private Int32 ParseExpression(ref Node node, int precedenceLevel)
         {
+            node = new Node();
+
             //If we have reached over the maximum precedence level, we need to parse a factor
             if (precedenceLevel > MaxPrecedenceLevel)
-                return ParseFactorEx(node);
+                return ParseFactorEx(ref node);
 
             //Parse another expression of higher precedence and set it to LType
-            Int32 lType = ParseExpression(node, precedenceLevel+1);
+            Int32 lType = ParseExpression(ref node, precedenceLevel+1);
 
             Int32 temporaryToken;
 
@@ -264,7 +267,7 @@ namespace esper_compiler.src
                 NextToken();
 
                 //Right child node is the other expression of high precedence level
-                Int32 rType = ParseExpression(node.Right, precedenceLevel + 1);
+                Int32 rType = ParseExpression(ref node.Right, precedenceLevel + 1);
 
                 //Return type retrieved from database
                 Int32 retType = Database.GetReturnType(op, lType, rType, precedenceLevel);
@@ -291,14 +294,14 @@ namespace esper_compiler.src
             return lType;
         }
 
-        private void ParseAssign(Node node)
+        private void ParseAssign(ref Node node)
         {
             node = new Node();
             node.Value = "ASSIGN";
             node.Left = new Node();
 
             //Parse the variable
-            Int32 type = ParseVariableFactor(node.Left);
+            Int32 type = ParseVariableFactor(ref node.Left);
 
             node.Attributes[2] = Database.GetTypeName(type);
 
@@ -309,14 +312,14 @@ namespace esper_compiler.src
             NextToken();
 
             //Expression is on the right child
-            Int32 exprType = ParseExpression(node.Right, 0);
+            Int32 exprType = ParseExpression(ref node.Right, 0);
 
             //Check type match between variable and expression
             if (!Database.CheckTypesAreEqual(exprType, type))
                 Error("Assignment types mismatched", CurrentToken.LineStart);
         }
 
-        private void ParseBlock(Node node)
+        private void ParseBlock(ref Node node)
         {
             //A block is a number of statements enclosed in {...}
             if (CurrentToken.Value.Equals("{"))
@@ -325,7 +328,7 @@ namespace esper_compiler.src
                 Database.NewScope();
                 NextToken();
 
-                ParseStatements(node);
+                ParseStatements(ref node);
 
                 if (!CurrentToken.Value.Equals("}"))
                     Error("Expected ending of the block: }", CurrentToken.LineStart);
@@ -334,10 +337,10 @@ namespace esper_compiler.src
             }
             //Or it can just be a single statement
             else
-                ParseStatement(node);
+                ParseStatement(ref node);
         }
 
-        private void ParseWhile(Node node)
+        private void ParseWhile(ref Node node)
         {
             node = new Node();
             node.Value = "WHILE";
@@ -349,7 +352,7 @@ namespace esper_compiler.src
 
             NextToken();
 
-            if (ParseExpression(node.Left, 0) != Database.GetType("BOOL"))
+            if (ParseExpression(ref node.Left, 0) != Database.GetType("BOOL"))
                 Error("Expression must be a boolean in the while", CurrentToken.LineStart);
 
             if (!CurrentToken.Value.Equals(")"))
@@ -357,10 +360,10 @@ namespace esper_compiler.src
 
             NextToken();
 
-            ParseBlock(node.Right);
+            ParseBlock(ref node.Right);
         }
 
-        private void ParseIf(Node node)
+        private void ParseIf(ref Node node)
         {
             node = new Node();
             node.Value = "IF";
@@ -372,7 +375,7 @@ namespace esper_compiler.src
 
             NextToken();
 
-            if (ParseExpression(node.Left, 0) != Database.GetType("BOOL"))
+            if (ParseExpression(ref node.Left, 0) != Database.GetType("BOOL"))
                 Error("IF expressions must be boolean in type", CurrentToken.LineStart);
 
             if (!CurrentToken.Value.Equals(")"))
@@ -380,7 +383,7 @@ namespace esper_compiler.src
 
             NextToken();
 
-            ParseBlock(node.Right);
+            ParseBlock(ref node.Right);
 
             //If followed by an else statement, parse the else tree
             //Node's value is else
@@ -397,13 +400,13 @@ namespace esper_compiler.src
                 node.Value = "ELSE";
 
                 if (CurrentToken.Value.Equals("IF"))
-                    ParseIf(node.Right);
+                    ParseIf(ref node.Right);
                 else
-                    ParseBlock(node.Right);
+                    ParseBlock(ref node.Right);
             }
         }
 
-        private void ParseReturn(Node node)
+        private void ParseReturn(ref Node node)
         {
             node = new Node();
             node.Value = "RETURN";
@@ -412,14 +415,14 @@ namespace esper_compiler.src
             
             if (RetType != Database.GetType("VOID"))
             {
-                if (!Database.CheckTypesAreEqual(ParseExpression(node.Right, 0), RetType))
+                if (!Database.CheckTypesAreEqual(ParseExpression(ref node.Right, 0), RetType))
                 {
                     Error("Return and function types mistmatched", CurrentToken.LineStart);
                 }
             }
         }
 
-        private void ParseVariableDeclaration(Node node)
+        private void ParseVariableDeclaration(ref Node node)
         {
             VariableInfo var = new VariableInfo();
 
@@ -438,24 +441,24 @@ namespace esper_compiler.src
             return Database.CheckVariable(CurrentToken.Value);
         }
 
-        private void ParseStatement(Node node)
+        private void ParseStatement(ref Node node)
         {
             //Check the first token to determine what to do
             if (CurrentToken.Value.Equals("IF"))
-                ParseIf(node);
+                ParseIf(ref node);
             else if (CurrentToken.Value.Equals("WHILE"))
-                ParseWhile(node);
+                ParseWhile(ref node);
             else if (CurrentToken.Value.Equals("RETURN"))
-                ParseReturn(node);
+                ParseReturn(ref node);
             else if (Database.CheckType(CurrentToken.Value))
-                ParseVariableDeclaration(node);
+                ParseVariableDeclaration(ref node);
             else if (CheckAssignComing())
-                ParseAssign(node);
+                ParseAssign(ref node);
             else
                 Error("Unknown statement", CurrentToken.LineStart);
         }
 
-        private void ParseStatements(Node node)
+        private void ParseStatements(ref Node node)
         {
             if (CurrentToken.Value.Equals("}"))
                 return;
@@ -464,15 +467,16 @@ namespace esper_compiler.src
             node.Value = "STATEMENT";
 
             if (!CurrentToken.Value.Equals(";"))
-                ParseStatement(node.Left);
+                ParseStatement(ref node.Left);
 
             if (!CurrentToken.Value.Equals(";"))
                 Error("Expected semicolon", CurrentToken.LineStart);
 
-            ParseStatements(node.Right);
+            NextToken();
+            ParseStatements(ref node.Right);
         }
 
-        private void ParseFunction(Node node)
+        private void ParseFunction(ref Node node)
         {
             RetType = ParseType();
 
@@ -493,7 +497,7 @@ namespace esper_compiler.src
 
             NextToken();
 
-            ParseStatements(node.Left);
+            ParseStatements(ref node.Left);
 
             if (!CurrentToken.Value.Equals("{"))
                 Error("Invalid ending: expected '}'", CurrentToken.LineStart);
@@ -502,7 +506,7 @@ namespace esper_compiler.src
         }
 
 
-        private void ParseFunctionsDefinitions(Node node)
+        private void ParseFunctionsDefinitions(ref Node node)
         {
             RetType = -1;
             Node currentNode;
@@ -510,31 +514,39 @@ namespace esper_compiler.src
             Boolean firstFunc = true;
 
             ResetToken();
-
-            while (CurrentToken.LineStart != Int32.MaxValue)
-            {
-                if (CheckFunctionIncoming())
+            
+                while (CurrentToken.LineStart != Int32.MaxValue)
                 {
-                    Database.NewScope();
-
-                    if (firstFunc)
+                    if (CheckFunctionIncoming())
                     {
-                        node = new Node();
-                        currentNode = node;
-                        firstFunc = false;
-                    }
-                    else
-                    {
-                        node.Right = new Node();
-                        node = node.Right;
-                    }
+                        Database.NewScope();
 
-                    ParseFunction(node);
+                        if (firstFunc)
+                        {
+                            node = new Node();
+                            currentNode = node;
+                            firstFunc = false;
+                        }
+                        else
+                        {
+                            node.Right = new Node();
+                            node = node.Right;
+                        }
 
-                    Database.ParentScope();
+                        ParseFunction(ref node);
+
+                        Database.ParentScope();
+                    }
+                    NextToken();
                 }
-                NextToken();
-            }
+        }
+
+        public void Parse()
+        {
+            
+
+            ResetToken();
+            ParseFunctionsDefinitions(ref Root);
         }
     }
 }

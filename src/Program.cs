@@ -28,6 +28,11 @@ namespace esper_compiler.src
             Preparser preparser = new Preparser();
             preparser.Preparse();
             preparser.PrintOut();
+
+            Parser parser = new Parser();
+            parser.Parse();
+
+            parser.Root.Print(parser.Root, "");
         }
     }
 }
