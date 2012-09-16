@@ -1,0 +1,15 @@
+﻿struct datum
+{
+	char chr;
+	bool val;
+}
+
+int add(int x, int y)
+{
+	return x + y;
+}
+
+int a = add(3,2);
+print a;
+
+int c <~ 3;
