@@ -8,7 +8,7 @@ namespace esper_compiler.src
     class FunctionInfo
     {
         public String Name;
-        public TokenType Type;
+        public Int32 Type;
         public List<VariableInfo> Parameters = new List<VariableInfo>();
     }
 }

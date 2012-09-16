@@ -7,16 +7,16 @@ namespace esper_compiler.src
 {
     class OperatorInfo
     {
-        String Name;
-        Boolean Unary;
+        public String Name;
+        public Boolean Unary;
 
-        Int32 LType;
-        Int32 RType;
-        Int32 RetType;
-        Int32 Precedance;
+        public Int32 LType;
+        public Int32 RType;
+        public Int32 RetType;
+        public Int32 Precedance;
 
-        FunctionInfo OperatorFunction;
-        Boolean Series;
+        public FunctionInfo OperatorFunction;
+        public Boolean Series;
 
         public OperatorInfo(String name, Boolean unary, Int32 lType, Int32 rType, Int32 retType, Int32 precedance)
         {
