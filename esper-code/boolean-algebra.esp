@@ -1,16 +1,16 @@
-﻿bool a
-a = true
+﻿bool a;
+a = true;
 
-bool b
-b = false
+bool b;
+b = false;
 
-bool c
-c = a || b
+bool c;
+c = a || b;
 
-int i
-i = 3
+int i;
+i = 3;
 
-bool d
-d = c && i <= 6
+bool d;
+d = c && i <= 6;
 
-print d
+print d;

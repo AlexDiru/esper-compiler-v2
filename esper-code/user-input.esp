@@ -1,7 +1,7 @@
-﻿int a
-input a
-print a
+﻿int a;
+input a;
+print a;
 
-string s
-input s
-print s
+string s;
+input s;
+print s;

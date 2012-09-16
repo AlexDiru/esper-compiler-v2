@@ -43,10 +43,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\Error.cs" />
     <Compile Include="src\Lexer.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Token.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="esper-code\boolean-algebra.esp" />
+    <None Include="esper-code\hello-world.esp" />
+    <None Include="esper-code\user-input.esp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

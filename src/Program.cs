@@ -11,7 +11,7 @@ namespace esper_compiler.src
         {
 
             Lexer lexer = new Lexer();
-            lexer.OpenProgram("C:\\Users\\Alex\\AppData\\Local\\Temp\\0x++ - 1\\Test.txt");
+            lexer.OpenProgram("../../esper-code/boolean-algebra.esp");
             Console.WriteLine(lexer.Program);
             lexer.PrepareTokensList();
             lexer.PrintTokens();
