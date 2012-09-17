@@ -541,10 +541,9 @@ namespace esper_compiler.src
 
         public void Parse()
         {
-            
-
             ResetToken();
             ParseFunctionsDefinitions(ref Root);
+            Root.RemoveEmptyChildren();
         }
     }
 }

@@ -49,5 +49,44 @@ namespace esper_compiler.src.datatypes
             if (node.Right != null)
                 node.Right.Print(node.Right, dash + "-");
         }
+
+        /// <summary>
+        /// Removes any empty child nodes of the current node
+        /// </summary>
+        public void RemoveEmptyChildren()
+        {
+            RemoveRecursive(this);
+        }
+
+        /// <summary>
+        /// Removes any empty child nodes of the specified node
+        /// </summary>
+        private void RemoveRecursive(Node node)
+        {
+            if (node.Left != null)
+            {
+                node.Left.RemoveEmptyChildren();
+
+                if (node.Left.IsEmpty())
+                    node.Left = null;
+            }
+
+            if (node.Right != null)
+            {
+                node.Right.RemoveEmptyChildren();
+
+                if (node.Right.IsEmpty())
+                    node.Right = null;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the current node has any values stored in it
+        /// </summary>
+        public Boolean IsEmpty()
+        {
+            return (Attributes[0].Equals("") && Attributes[1].Equals("") && Attributes[2].Equals("") &&
+                    Value.Equals("") && Left == null && Right == null);
+        }
     }
 }
