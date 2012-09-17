@@ -94,7 +94,7 @@ namespace esper_compiler.src
         /// </summary>
         public void ParseTypesDeclarations()
         {
-            for (int Line = 0; Line < Lines && CurrentToken != null; Line++)
+            for (int Line = 0; Line < Lines && CurrentToken.LineStart != Int32.MaxValue; Line++)
             {
                 if (CurrentToken.Value != ";")
                 {
@@ -234,6 +234,23 @@ namespace esper_compiler.src
             ParseTypesDeclarations();
             ResetToken();
             ParseGlobalVariableDeclarations();
+
+            //Wrap in void main
+            Token v = new Token(TokenType.Identifier, "VOID");
+            Token m = new Token(TokenType.Identifier, "MAIN");
+            Token pl = new Token(TokenType.Symbol, "(");
+            Token pr = new Token(TokenType.Symbol, ")");
+            Token bl = new Token(TokenType.Symbol, "{");
+            Token br = new Token(TokenType.Symbol, "}");
+
+            Tokens.Insert(0, bl);
+            Tokens.Insert(0, pr);
+            Tokens.Insert(0, pl);
+            Tokens.Insert(0, m);
+            Tokens.Insert(0, v);
+
+            Tokens.Add(br);
+
             ResetToken();
             ParseFunctionDeclarations();
         }

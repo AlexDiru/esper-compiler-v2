@@ -455,7 +455,7 @@ namespace esper_compiler.src
             else if (CheckAssignComing())
                 ParseAssign(ref node);
             else
-                Error("Unknown statement", CurrentToken.LineStart);
+                ParseFactorEx(ref node);//Error("Unknown statement", CurrentToken.LineStart);
         }
 
         private void ParseStatements(ref Node node)
@@ -469,8 +469,8 @@ namespace esper_compiler.src
             if (!CurrentToken.Value.Equals(";"))
                 ParseStatement(ref node.Left);
 
-            if (!CurrentToken.Value.Equals(";"))
-                Error("Expected semicolon", CurrentToken.LineStart);
+            //if (!CurrentToken.Value.Equals(";"))
+                //Error("Expected semicolon", CurrentToken.LineStart);
 
             NextToken();
             ParseStatements(ref node.Right);
@@ -499,7 +499,7 @@ namespace esper_compiler.src
 
             ParseStatements(ref node.Left);
 
-            if (!CurrentToken.Value.Equals("{"))
+            if (!CurrentToken.Value.Equals("}"))
                 Error("Invalid ending: expected '}'", CurrentToken.LineStart);
 
             NextToken();

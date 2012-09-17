@@ -46,7 +46,7 @@ namespace esper_compiler.src
             }
             catch
             {
-                CurrentToken.Value = ";";
+                CurrentToken = new Token();
                 CurrentToken.LineStart = Int32.MaxValue;
                 CurrentToken.Type = TokenType.Symbol;
             }

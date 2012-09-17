@@ -203,15 +203,15 @@ namespace esper_compiler.src
                 return TokenType.EOL;
             }
 
-            //Identifier token
-            if ((char.IsLetterOrDigit(Program[CharacterPosition])) ||
-                (Program[CharacterPosition].Equals('_') && char.IsLetterOrDigit(Program[CharacterPosition + 1])))
-                return GetIdentifier();
-
             //Number token
             if ((char.IsDigit(Program[CharacterPosition])) ||
                 (Program[CharacterPosition].Equals('.') && char.IsDigit(Program[CharacterPosition + 1])))
                 return GetNumber();
+
+            //Identifier token
+            if ((char.IsLetterOrDigit(Program[CharacterPosition])) ||
+                (Program[CharacterPosition].Equals('_') && char.IsLetterOrDigit(Program[CharacterPosition + 1])))
+                return GetIdentifier();
 
             //Character token
             if (Program[CharacterPosition].Equals('\"'))

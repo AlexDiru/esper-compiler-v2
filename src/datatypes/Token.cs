@@ -48,5 +48,11 @@ namespace esper_compiler.src.datatypes
             LineStart = -1;
             CharacterPosition = -1;
         }
+
+        public Token(TokenType type, String value)
+        {
+            Type = type;
+            Value = value;
+        }
     }
 }
