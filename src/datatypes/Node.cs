@@ -21,6 +21,16 @@ namespace esper_compiler.src.datatypes
             Attributes[0] = Attributes[1] = Attributes[2] = Value = String.Empty;
         }
 
+        public Node Clone()
+        {
+            Node n = new Node();
+            n.Attributes = Attributes;
+            n.Value = Value;
+            n.Left = Left;
+            n.Right = Right;
+            return n;
+        }
+
         public void Print(Node node, String dash)
         {
             Console.Write("\n" + dash + "-> " + node.Value);

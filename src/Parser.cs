@@ -195,11 +195,10 @@ namespace esper_compiler.src
         /// </summary>
         private Int32 ParseFactorEx(ref Node node)
         {
-            node = new Node();
-
             //If a pre-unary operator exists
             if (Database.CheckUnaryOperator(CurrentToken.Value, true))
             {
+                node = new Node();
                 node.Value = CurrentToken.Value;
                 node.Attributes[0] = "UNARY_OPERATOR";
                 NextToken();
@@ -236,8 +235,6 @@ namespace esper_compiler.src
 
         private Int32 ParseExpression(ref Node node, int precedenceLevel)
         {
-            node = new Node();
-
             //If we have reached over the maximum precedence level, we need to parse a factor
             if (precedenceLevel > MaxPrecedenceLevel)
                 return ParseFactorEx(ref node);
@@ -260,7 +257,7 @@ namespace esper_compiler.src
                 Node temp;
                 temp = node;
                 node.Left = new Node();
-                node.Left = temp;
+                node.Left = temp.Clone();
 
                 node.Value = op;
                 node.Attributes[0] = "OPERATOR";
@@ -283,6 +280,7 @@ namespace esper_compiler.src
                     node.Right = null;
                     node = temp;
                     TokenIndex = temporaryToken;
+                    CurrentToken = Tokens[TokenIndex];
                     break;
                 }
 
