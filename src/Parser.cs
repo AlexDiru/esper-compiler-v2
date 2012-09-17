@@ -111,7 +111,9 @@ namespace esper_compiler.src
             //A factor can be an expression in brackets
             if (CurrentToken.Value.Equals("("))
             {
-                NextToken();
+                if (CurrentToken.Value.Equals("("))
+                    NextToken();
+
                 Int32 type = ParseExpression(ref node, 0);
 
                 if (!CurrentToken.Value.Equals(")"))
@@ -235,6 +237,25 @@ namespace esper_compiler.src
 
         private Int32 ParseExpression(ref Node node, int precedenceLevel)
         {
+            Int32 type = ParseFactor(ref node);
+
+            if (Database.CheckOperator(CurrentToken.Value))
+            {
+                if (node == null)
+                    node = new Node();
+
+                Node clonedNode = node.Clone();
+                node.Left = clonedNode;
+                node.Value = CurrentToken.Value;
+
+                NextToken();
+
+                ParseFactor(ref node.Right);
+            }
+
+            return type;
+
+            /*
             //If we have reached over the maximum precedence level, we need to parse a factor
             if (precedenceLevel > MaxPrecedenceLevel)
                 return ParseFactorEx(ref node);
@@ -290,6 +311,7 @@ namespace esper_compiler.src
             }
 
             return lType;
+             * */
         }
 
         private void ParseAssign(ref Node node)
